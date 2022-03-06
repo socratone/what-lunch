@@ -1,13 +1,13 @@
 import styled from '@emotion/styled';
 import { useContext } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { AccessTokenContext } from '../../../contexts/AccessTokenContext';
 import { removeUserToken } from '../../../libs/userTokenStorage';
-import Button from '../Button/Button';
 import NavLink from './NavLink';
 
+const NAV_HEIGHT = 40;
+
 const NavLayout = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const { changeAccessToken } = useContext(AccessTokenContext);
 
@@ -21,10 +21,8 @@ const NavLayout = () => {
     <Container>
       <Header>
         <Nav>
-          <NavLink to="/home" selected={location.pathname === '/home'}>
-            홈
-          </NavLink>
-          <Button onClick={handleSignOut}>로그아웃</Button>
+          <NavLink to="/map">지도</NavLink>
+          <SignOutButton onClick={handleSignOut}>로그아웃</SignOutButton>
         </Nav>
       </Header>
       <Main>
@@ -39,7 +37,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.header`
-  height: 60px;
+  height: ${NAV_HEIGHT}px;
   border-bottom: 1px solid #e4e4e4;
 `;
 
@@ -47,12 +45,25 @@ const Nav = styled.nav`
   height: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 0 30px 0 20px;
+  padding: 0 20px;
+
+  > *:first-of-type {
+    padding-left: 0;
+  }
 `;
 
 const Main = styled.main`
-  height: calc(100% - 60px);
-  background: #f6f6f6;
+  height: calc(100% - ${NAV_HEIGHT}px);
+`;
+
+const SignOutButton = styled.button`
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+
+  :hover {
+    font-weight: 700;
+  }
 `;
 
 export default NavLayout;

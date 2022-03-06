@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import NavLayout from './components/common/NavLayout/NavLayout';
 import { AccessTokenContext } from './contexts/AccessTokenContext';
-import HomePage from './pages/HomePage';
+import MapPage from './pages/MapPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 
@@ -13,8 +13,8 @@ const Router = () => {
     <Routes>
       {accessToken ? (
         <Route element={<NavLayout />}>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="*" element={<Navigate to="/home" />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="*" element={<Navigate to="/map" />} />
         </Route>
       ) : (
         <>

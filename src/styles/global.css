@@ -29,3 +29,8 @@ h5,
 p {
   margin: 0;
 }
+
+a {
+  color: dodgerblue;
+  text-decoration: none;
+}
