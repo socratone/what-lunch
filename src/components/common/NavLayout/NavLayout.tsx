@@ -1,9 +1,21 @@
 import styled from '@emotion/styled';
-import { Outlet, useLocation } from 'react-router-dom';
+import { useContext } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { AccessTokenContext } from '../../../contexts/AccessTokenContext';
+import { removeUserToken } from '../../../libs/userTokenStorage';
+import Button from '../Button/Button';
 import NavLink from './NavLink';
 
 const NavLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { changeAccessToken } = useContext(AccessTokenContext);
+
+  const handleSignOut = () => {
+    changeAccessToken('');
+    removeUserToken('access');
+    navigate('/signin');
+  };
 
   return (
     <Container>
@@ -12,9 +24,7 @@ const NavLayout = () => {
           <NavLink to="/home" selected={location.pathname === '/home'}>
             홈
           </NavLink>
-          <NavLink to="/signin" selected={location.pathname === '/signin'}>
-            로그인
-          </NavLink>
+          <Button onClick={handleSignOut}>로그아웃</Button>
         </Nav>
       </Header>
       <Main>
