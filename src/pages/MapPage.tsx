@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
 import { getCurrentPosition } from '../libs/geolocation';
 
@@ -13,6 +14,8 @@ const { kakao } = window;
 
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (mapRef.current) {
@@ -35,6 +38,8 @@ const MapPage = () => {
         // 마커가 지도 위에 표시되도록 설정합니다
         marker.setMap(map);
 
+        setLoading(false);
+
         // kakao.maps.event.addListener(marker, 'click', function () {
         //   window.open('http://kko.to/zjqllOCLO');
         // });
@@ -48,7 +53,7 @@ const MapPage = () => {
         <FilterContainer>
           <div>별점 ⭐️⭐️⭐️⭐️⭐️</div>
         </FilterContainer>
-        <KakaoMap ref={mapRef} />
+        <KakaoMap ref={mapRef}>{loading && <Loader />}</KakaoMap>
       </FlexColumn>
     </Page>
   );
@@ -70,6 +75,9 @@ const FilterContainer = styled.div`
 const KakaoMap = styled.div`
   width: 100%;
   flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default MapPage;
