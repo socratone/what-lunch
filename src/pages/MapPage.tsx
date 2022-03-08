@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
 import { getCurrentPosition } from '../libs/geolocation';
+import { SearchResult } from '../libs/kakaoMap/types';
 
 declare global {
   interface Window {
@@ -12,14 +13,24 @@ declare global {
 
 const { kakao } = window;
 
+type Location = { latitude: number; longitude: number };
+
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const [loading, setLoading] = useState(true);
+  const [searchValue, setSearchValue] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[] | null>(
+    null
+  );
+  const [mapLoading, setMapLoading] = useState(true);
+
+  const [myLocation, setMyLocation] = useState<Location | null>(null);
 
   useEffect(() => {
     if (mapRef.current) {
       getCurrentPosition().then(({ latitude, longitude }) => {
+        setMyLocation({ latitude, longitude });
+
         const options = {
           center: new kakao.maps.LatLng(latitude, longitude),
           level: 3,
@@ -38,14 +49,39 @@ const MapPage = () => {
         // 마커가 지도 위에 표시되도록 설정합니다
         marker.setMap(map);
 
-        setLoading(false);
-
-        // kakao.maps.event.addListener(marker, 'click', function () {
-        //   window.open('http://kko.to/zjqllOCLO');
-        // });
+        setMapLoading(false);
       });
     }
   }, []);
+
+  const handleChangeSearchValue = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setSearchValue(event.target.value);
+  };
+
+  const keywordSearch = () => {
+    if (!myLocation) return;
+
+    const places = new kakao.maps.services.Places();
+
+    places.keywordSearch(
+      searchValue,
+      (result: SearchResult[], status: any) => {
+        if (status === kakao.maps.services.Status.OK) {
+          console.log('result:', result);
+          setSearchResults(result);
+        }
+      },
+      {
+        x: myLocation.longitude,
+        y: myLocation.latitude,
+        radius: 1000, // 1000m
+        size: 5,
+        sort: kakao.maps.services.SortBy.DISTANCE,
+      }
+    );
+  };
 
   return (
     <Page fullWidth>
@@ -53,7 +89,16 @@ const MapPage = () => {
         <FilterContainer>
           <div>별점 ⭐️⭐️⭐️⭐️⭐️</div>
         </FilterContainer>
-        <KakaoMap ref={mapRef}>{loading && <Loader />}</KakaoMap>
+        <SearchContainer>
+          <input value={searchValue} onChange={handleChangeSearchValue} />
+          <button onClick={keywordSearch}>검색</button>
+          <SearchItems>
+            {searchResults?.map((item) => (
+              <SearchItem key={item.id}>{item.place_name}</SearchItem>
+            ))}
+          </SearchItems>
+        </SearchContainer>
+        <KakaoMap ref={mapRef}>{mapLoading && <Loader />}</KakaoMap>
       </FlexColumn>
     </Page>
   );
@@ -72,12 +117,36 @@ const FilterContainer = styled.div`
   align-items: center;
 `;
 
+const SearchContainer = styled.div`
+  padding: 0 20px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+`;
+
 const KakaoMap = styled.div`
   width: 100%;
   flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+`;
+
+const SearchItems = styled.div`
+  display: flex;
+  margin-left: 10px;
+
+  > * {
+    margin-right: 10px;
+  }
+`;
+
+const SearchItem = styled.div`
+  cursor: pointer;
+  background: dodgerblue;
+  border-radius: 5px;
+  color: white;
+  padding: 5px;
 `;
 
 export default MapPage;
