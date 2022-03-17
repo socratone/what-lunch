@@ -1,4 +1,4 @@
-export type SearchResult = {
+export type SearchItem = {
   address_name: string;
   category_group_code: string;
   category_group_name: string;
