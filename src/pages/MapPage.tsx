@@ -1,7 +1,9 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
+import Button from '../components/common/Button/Button';
 import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
+import TextInput from '../components/common/TextInput/TextInput';
 import { getCurrentPosition } from '../libs/geolocation';
 import { SearchResult } from '../libs/kakaoMap/types';
 
@@ -90,14 +92,14 @@ const MapPage = () => {
           <div>별점 ⭐️⭐️⭐️⭐️⭐️</div>
         </FilterContainer>
         <SearchContainer>
-          <input value={searchValue} onChange={handleChangeSearchValue} />
-          <button onClick={keywordSearch}>검색</button>
-          <SearchItems>
-            {searchResults?.map((item) => (
-              <SearchItem key={item.id}>{item.place_name}</SearchItem>
-            ))}
-          </SearchItems>
+          <TextInput value={searchValue} onChange={handleChangeSearchValue} />
+          <Button onClick={keywordSearch}>검색</Button>
         </SearchContainer>
+        <SearchItems>
+          {searchResults?.map((item) => (
+            <SearchItem key={item.id}>{item.place_name}</SearchItem>
+          ))}
+        </SearchItems>
         <KakaoMap ref={mapRef}>{mapLoading && <Loader />}</KakaoMap>
       </FlexColumn>
     </Page>
@@ -120,8 +122,11 @@ const FilterContainer = styled.div`
 const SearchContainer = styled.div`
   padding: 0 20px;
   min-height: 40px;
-  display: flex;
-  align-items: center;
+  margin-bottom: 10px;
+
+  > *:first-of-type {
+    margin-right: 10px;
+  }
 `;
 
 const KakaoMap = styled.div`
@@ -134,7 +139,12 @@ const KakaoMap = styled.div`
 
 const SearchItems = styled.div`
   display: flex;
-  margin-left: 10px;
+  padding: 0 20px;
+  flex-wrap: wrap;
+
+  > * {
+    margin-bottom: 10px;
+  }
 
   > * {
     margin-right: 10px;
