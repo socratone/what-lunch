@@ -21,8 +21,8 @@ type Location = { latitude: number; longitude: number };
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<any>();
-  const createdMarkers = useRef<any[]>([]);
-  const selectedMarker = useRef<any>();
+  const markers = useRef<{ id: string; instance: any }[]>([]);
+  const selectedMarker = useRef<{ id: string; instance: any }>();
 
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState<SearchItem[] | null>(null);
@@ -91,7 +91,7 @@ const MapPage = () => {
   };
 
   const createMarker = (item: SearchItem) => {
-    const { y: latitude, x: longitude } = item;
+    const { y: latitude, x: longitude, id } = item;
 
     const markerPosition = new kakao.maps.LatLng(latitude, longitude); // 마커가 표시될 위치
     const imageSrc =
@@ -114,11 +114,14 @@ const MapPage = () => {
 
       // 클릭된 마커가 없고, click 마커가 클릭된 마커가 아니면
       // 마커의 이미지를 클릭 이미지로 변경
-      if (!selectedMarker.current || selectedMarker.current !== marker) {
+      if (
+        !selectedMarker.current ||
+        selectedMarker.current.instance !== marker
+      ) {
         // 클릭된 마커 객체가 null이 아니면
         // 클릭된 마커의 이미지를 기본 이미지로 변경하고
         !!selectedMarker.current &&
-          selectedMarker.current.setImage(markerImage);
+          selectedMarker.current.instance.setImage(markerImage);
 
         const selectedMarkerImage = createSelectedMarkerImage();
 
@@ -127,17 +130,19 @@ const MapPage = () => {
       }
 
       // 클릭된 마커를 현재 클릭된 마커 객체로 설정
-      selectedMarker.current = marker;
+      selectedMarker.current = { id, instance: marker };
     });
 
-    createdMarkers.current.push(marker);
+    markers.current.push({ id, instance: marker });
   };
 
   const clearMarker = () => {
-    createdMarkers.current.forEach((marker) => {
-      marker.setMap(null);
+    markers.current.forEach((marker) => {
+      marker.instance.setMap(null);
     });
   };
+
+  console.log('markers:', markers);
 
   const moveMap = (latitude: number, longitude: number) => {
     const moveLatLon = new kakao.maps.LatLng(latitude, longitude); // 이동할 위도 경도 위치를 생성
