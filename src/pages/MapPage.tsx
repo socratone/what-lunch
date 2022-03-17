@@ -19,7 +19,7 @@ type Location = { latitude: number; longitude: number };
 
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const map = useRef();
+  const map = useRef<any>();
   const createdMarkers = useRef<any[]>([]);
 
   const [searchValue, setSearchValue] = useState('');
@@ -71,6 +71,7 @@ const MapPage = () => {
       (result: SearchItem[], status: any) => {
         if (status === kakao.maps.services.Status.OK) {
           clearMarker();
+
           setSearchItems(result);
           result.forEach((item) => {
             createMarker(item);
@@ -112,6 +113,11 @@ const MapPage = () => {
     });
   };
 
+  const moveMap = (latitude: number, longitude: number) => {
+    const moveLatLon = new kakao.maps.LatLng(latitude, longitude); // 이동할 위도 경도 위치를 생성
+    map.current.panTo(moveLatLon); // 지도 중심을 부드럽게 이동, 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동
+  };
+
   return (
     <Page fullWidth>
       <FlexColumn>
@@ -124,7 +130,12 @@ const MapPage = () => {
         </SearchContainer>
         <SearchItemContainer>
           {searchItems?.map((item) => (
-            <SearchItemChip key={item.id}>{item.place_name}</SearchItemChip>
+            <SearchItemChip
+              key={item.id}
+              onClick={() => moveMap(Number(item.y), Number(item.x))}
+            >
+              {item.place_name}
+            </SearchItemChip>
           ))}
         </SearchItemContainer>
         <KakaoMap ref={mapRef}>{mapLoading && <Loader />}</KakaoMap>
