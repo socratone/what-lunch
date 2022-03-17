@@ -5,6 +5,7 @@ import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
 import TextInput from '../components/common/TextInput/TextInput';
 import { getCurrentPosition } from '../libs/geolocation';
+import { createSelectedMarkerImage } from '../libs/kakaoMap';
 import { SearchItem } from '../libs/kakaoMap/types';
 
 declare global {
@@ -21,6 +22,7 @@ const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<any>();
   const createdMarkers = useRef<any[]>([]);
+  const selectedMarker = useRef<any>();
 
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState<SearchItem[] | null>(null);
@@ -106,9 +108,26 @@ const MapPage = () => {
       image: markerImage, // 마커 이미지
     });
 
-    // 마커에 클릭이벤트를 등록합니다
+    // 마커에 클릭이벤트 등록
     kakao.maps.event.addListener(marker, 'click', () => {
       moveMap(Number(latitude), Number(longitude));
+
+      // 클릭된 마커가 없고, click 마커가 클릭된 마커가 아니면
+      // 마커의 이미지를 클릭 이미지로 변경
+      if (!selectedMarker.current || selectedMarker.current !== marker) {
+        // 클릭된 마커 객체가 null이 아니면
+        // 클릭된 마커의 이미지를 기본 이미지로 변경하고
+        !!selectedMarker.current &&
+          selectedMarker.current.setImage(markerImage);
+
+        const selectedMarkerImage = createSelectedMarkerImage();
+
+        // 현재 클릭된 마커의 이미지는 클릭 이미지로 변경
+        marker.setImage(selectedMarkerImage);
+      }
+
+      // 클릭된 마커를 현재 클릭된 마커 객체로 설정
+      selectedMarker.current = marker;
     });
 
     createdMarkers.current.push(marker);
