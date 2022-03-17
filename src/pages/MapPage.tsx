@@ -89,7 +89,9 @@ const MapPage = () => {
   };
 
   const createMarker = (item: SearchItem) => {
-    const markerPosition = new kakao.maps.LatLng(item.y, item.x); // 마커가 표시될 위치
+    const { y: latitude, x: longitude } = item;
+
+    const markerPosition = new kakao.maps.LatLng(latitude, longitude); // 마커가 표시될 위치
     const imageSrc =
       'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'; // 마커 이미지의 이미지 주소
     const imageSize = new kakao.maps.Size(24, 35); // 마커 이미지의 이미지 크기
@@ -102,6 +104,11 @@ const MapPage = () => {
       map: map.current,
       position: markerPosition,
       image: markerImage, // 마커 이미지
+    });
+
+    // 마커에 클릭이벤트를 등록합니다
+    kakao.maps.event.addListener(marker, 'click', () => {
+      moveMap(Number(latitude), Number(longitude));
     });
 
     createdMarkers.current.push(marker);
