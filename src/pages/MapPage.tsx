@@ -20,6 +20,7 @@ type Location = { latitude: number; longitude: number };
 const MapPage = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef();
+  const createdMarkers = useRef<any[]>([]);
 
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState<SearchItem[] | null>(null);
@@ -69,6 +70,7 @@ const MapPage = () => {
       searchValue,
       (result: SearchItem[], status: any) => {
         if (status === kakao.maps.services.Status.OK) {
+          clearMarker();
           setSearchItems(result);
           result.forEach((item) => {
             createMarker(item);
@@ -95,10 +97,18 @@ const MapPage = () => {
     const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
 
     // 마커 생성
-    new kakao.maps.Marker({
+    const marker = new kakao.maps.Marker({
       map: map.current,
       position: markerPosition,
       image: markerImage, // 마커 이미지
+    });
+
+    createdMarkers.current.push(marker);
+  };
+
+  const clearMarker = () => {
+    createdMarkers.current.forEach((marker) => {
+      marker.setMap(null);
     });
   };
 
