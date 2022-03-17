@@ -4,8 +4,9 @@ import Button from '../components/common/Button/Button';
 import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
 import TextInput from '../components/common/TextInput/TextInput';
+import SearchItemChip from '../components/map/SearchItemChip/SearchItemChip';
 import { getCurrentPosition } from '../libs/geolocation';
-import { createSelectedMarkerImage } from '../libs/kakaoMap';
+import { createMarkerImage, createSelectedMarkerImage } from '../libs/kakaoMap';
 import { SearchItem } from '../libs/kakaoMap/types';
 
 declare global {
@@ -23,6 +24,7 @@ const MapPage = () => {
   const map = useRef<any>();
   const markers = useRef<{ id: string; instance: any }[]>([]);
   const selectedMarker = useRef<{ id: string; instance: any }>();
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
 
   const [searchValue, setSearchValue] = useState('');
   const [searchItems, setSearchItems] = useState<SearchItem[] | null>(null);
@@ -94,12 +96,9 @@ const MapPage = () => {
     const { y: latitude, x: longitude, id } = item;
 
     const markerPosition = new kakao.maps.LatLng(latitude, longitude); // 마커가 표시될 위치
-    const imageSrc =
-      'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'; // 마커 이미지의 이미지 주소
-    const imageSize = new kakao.maps.Size(24, 35); // 마커 이미지의 이미지 크기
 
     // 마커 이미지 생성
-    const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+    const markerImage = createMarkerImage();
 
     // 마커 생성
     const marker = new kakao.maps.Marker({
@@ -123,14 +122,13 @@ const MapPage = () => {
         !!selectedMarker.current &&
           selectedMarker.current.instance.setImage(markerImage);
 
-        const selectedMarkerImage = createSelectedMarkerImage();
-
         // 현재 클릭된 마커의 이미지는 클릭 이미지로 변경
-        marker.setImage(selectedMarkerImage);
+        marker.setImage(createSelectedMarkerImage());
       }
 
       // 클릭된 마커를 현재 클릭된 마커 객체로 설정
       selectedMarker.current = { id, instance: marker };
+      setSelectedMarkerId(id); // chip state 변경
     });
 
     markers.current.push({ id, instance: marker });
@@ -142,11 +140,31 @@ const MapPage = () => {
     });
   };
 
-  console.log('markers:', markers);
-
   const moveMap = (latitude: number, longitude: number) => {
     const moveLatLon = new kakao.maps.LatLng(latitude, longitude); // 이동할 위도 경도 위치를 생성
     map.current.panTo(moveLatLon); // 지도 중심을 부드럽게 이동, 만약 이동할 거리가 지도 화면보다 크면 부드러운 효과 없이 이동
+  };
+
+  const handleClickSearchItem = (item: SearchItem) => {
+    const { y, x, id } = item;
+    moveMap(Number(y), Number(x)); // 맵 이동
+
+    // 이전에 선택했던 마커의 이미지 변경
+    const preSelected = markers.current.find(
+      (marker) => marker.id === selectedMarkerId
+    );
+    if (selectedMarkerId === id) return; // 중복 클릭 방지
+    preSelected && preSelected.instance.setImage(createMarkerImage());
+
+    // 지금 선택한 마커의 이미지 변경
+    const selected = markers.current.find((marker) => marker.id === id);
+    if (selected) {
+      selected.instance.setImage(createSelectedMarkerImage());
+
+      // 클릭된 마커를 현재 클릭된 마커 객체로 설정
+      selectedMarker.current = { id, instance: selected.instance };
+      setSelectedMarkerId(id); // chip state 변경
+    }
   };
 
   return (
@@ -163,7 +181,8 @@ const MapPage = () => {
           {searchItems?.map((item) => (
             <SearchItemChip
               key={item.id}
-              onClick={() => moveMap(Number(item.y), Number(item.x))}
+              onClick={() => handleClickSearchItem(item)}
+              selected={item.id === selectedMarkerId}
             >
               {item.place_name}
             </SearchItemChip>
@@ -218,14 +237,6 @@ const SearchItemContainer = styled.div`
   > * {
     margin-right: 10px;
   }
-`;
-
-const SearchItemChip = styled.div`
-  cursor: pointer;
-  background: dodgerblue;
-  border-radius: 5px;
-  color: white;
-  padding: 5px;
 `;
 
 export default MapPage;

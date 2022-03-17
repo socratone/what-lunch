@@ -37,3 +37,10 @@ export const createSelectedMarkerImage = () => {
 
   return markerImage;
 };
+
+export const createMarkerImage = () => {
+  const imageSrc =
+    'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png'; // 마커 이미지의 이미지 주소
+  const imageSize = new kakao.maps.Size(24, 35); // 마커 이미지의 이미지 크기
+  return new kakao.maps.MarkerImage(imageSrc, imageSize);
+};
