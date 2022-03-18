@@ -45,11 +45,7 @@ const Nav = styled.nav`
   height: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 0 20px;
-
-  > *:first-of-type {
-    padding-left: 0;
-  }
+  padding: 0 10px;
 `;
 
 const Main = styled.main`
@@ -58,6 +54,7 @@ const Main = styled.main`
 
 const SignOutButton = styled.button`
   border: 0;
+  padding: 0;
   background: transparent;
   cursor: pointer;
 

@@ -14,7 +14,6 @@ const StyledLink = styled(Link)`
   color: black;
   font-size: 16px;
   font-weight: 500;
-  padding: 0 10px;
   display: flex;
   align-items: center;
 

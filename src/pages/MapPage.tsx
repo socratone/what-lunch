@@ -1,9 +1,8 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
-import Button from '../components/common/Button/Button';
 import Loader from '../components/common/Loader/Loader';
 import Page from '../components/common/Page/Page';
-import TextInput from '../components/common/TextInput/TextInput';
+import SearchInput from '../components/map/SearchInput/SearchInput';
 import SearchItemChip from '../components/map/SearchItemChip/SearchItemChip';
 import { getCurrentPosition } from '../libs/geolocation';
 import { createMarkerImage, createSelectedMarkerImage } from '../libs/kakaoMap';
@@ -65,13 +64,13 @@ const MapPage = () => {
     setSearchValue(event.target.value);
   };
 
-  const keywordSearch = () => {
+  const searchShop = (value: string) => {
     if (!myLocation) return;
 
     const places = new kakao.maps.services.Places();
 
     places.keywordSearch(
-      searchValue,
+      value,
       (result: SearchItem[], status: any) => {
         if (status === kakao.maps.services.Status.OK) {
           clearMarker();
@@ -170,24 +169,27 @@ const MapPage = () => {
   return (
     <Page fullWidth>
       <FlexColumn>
-        <FilterContainer>
-          <div>별점 ⭐️⭐️⭐️⭐️⭐️</div>
-        </FilterContainer>
-        <SearchContainer>
-          <TextInput value={searchValue} onChange={handleChangeSearchValue} />
-          <Button onClick={keywordSearch}>검색</Button>
-        </SearchContainer>
-        <SearchItemContainer>
-          {searchItems?.map((item) => (
-            <SearchItemChip
-              key={item.id}
-              onClick={() => handleClickSearchItem(item)}
-              selected={item.id === selectedMarkerId}
-            >
-              {item.place_name}
-            </SearchItemChip>
-          ))}
-        </SearchItemContainer>
+        <Header>
+          <SearchContainer>
+            <SearchInput
+              value={searchValue}
+              onChange={handleChangeSearchValue}
+              onSubmit={searchShop}
+            />
+          </SearchContainer>
+          <SearchItemContainer>
+            {searchItems?.map((item) => (
+              <SearchItemChip
+                key={item.id}
+                onClick={() => handleClickSearchItem(item)}
+                selected={item.id === selectedMarkerId}
+              >
+                {item.place_name}
+              </SearchItemChip>
+            ))}
+          </SearchItemContainer>
+        </Header>
+
         <KakaoMap ref={mapRef}>{mapLoading && <Loader />}</KakaoMap>
       </FlexColumn>
     </Page>
@@ -200,19 +202,24 @@ const FlexColumn = styled.div`
   height: 100%;
 `;
 
-const FilterContainer = styled.div`
-  padding: 0 20px;
-  min-height: 40px;
-  display: flex;
-  align-items: center;
+const Header = styled.header`
+  padding: 10px 10px 0 10px;
 `;
 
 const SearchContainer = styled.div`
-  padding: 0 20px;
   min-height: 40px;
   margin-bottom: 10px;
+`;
 
-  > *:first-of-type {
+const SearchItemContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+
+  > * {
+    margin-bottom: 10px;
+  }
+
+  > * {
     margin-right: 10px;
   }
 `;
@@ -223,20 +230,6 @@ const KakaoMap = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const SearchItemContainer = styled.div`
-  display: flex;
-  padding: 0 20px;
-  flex-wrap: wrap;
-
-  > * {
-    margin-bottom: 10px;
-  }
-
-  > * {
-    margin-right: 10px;
-  }
 `;
 
 export default MapPage;
